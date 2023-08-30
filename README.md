@@ -1,2 +1,2 @@
 # fledgepower-filter-systemsp
-This filter plugin handles system status points
+This notification rule plugin handles system status points

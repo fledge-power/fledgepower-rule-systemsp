@@ -21,7 +21,7 @@
 
 #include "configPlugin.h"
 
-typedef void (*FuncPtr)(void *, void *);
+using FuncPtr = void (*)(void *, void *);
 
 namespace systemspr {
 
@@ -40,7 +40,6 @@ public:
 private:
     ConfigPlugin             m_configPlugin;
     mutable std::mutex       m_configMutex;
-    std::atomic<bool>        m_isRunning{false};
     std::atomic<bool>        m_enabled{false};
     std::string              m_reason;
 };

@@ -2,8 +2,6 @@
 #include <cctype>
 #include <algorithm>
 
-#include <rapidjson/document.h>
-
 #include "configPlugin.h"
 #include "constantsSystem.h"
 #include "utilityPivot.h"
@@ -47,56 +45,72 @@ void ConfigPlugin::importExchangedData(const std::string & exchangeConfig) {
 
     bool foundPrtInf = false;
     for (const rapidjson::Value& datapoint : datapoints.GetArray()) {
-        
-        if (!datapoint.IsObject()) {
-            UtilityPivot::log_error("%s datapoint is not an object", beforeLog.c_str());
-            continue;
-        }
-        
-        if (!datapoint.HasMember(ConstantsSystem::JsonPivotType) || !datapoint[ConstantsSystem::JsonPivotType].IsString()) {
-            UtilityPivot::log_error("%s pivot_type not found in datapoint or is not a string", beforeLog.c_str());
-            continue;
-        }
-
-        std::string type = datapoint[ConstantsSystem::JsonPivotType].GetString();
-        if (type != ConstantsSystem::JsonCdcSps && type != ConstantsSystem::JsonCdcDps) {
-            // Ignore datapoints that are not a TS
-            continue;
-        }
-
-        if (!datapoint.HasMember(ConstantsSystem::JsonPivotId) || !datapoint[ConstantsSystem::JsonPivotId].IsString()) {
-            UtilityPivot::log_error("%s pivot_id not found in datapoint or is not a string", beforeLog.c_str());
-            continue;
-        }
-        std::string pivot_id = datapoint[ConstantsSystem::JsonPivotId].GetString();
-
-        if (!datapoint.HasMember(ConstantsSystem::JsonPivotSubtypes) || !datapoint[ConstantsSystem::JsonPivotSubtypes].IsArray()) {
-            // No pivot subtypes, nothing to do
-            continue;
-        }
-
-        if (!datapoint.HasMember(ConstantsSystem::JsonLabel) || !datapoint[ConstantsSystem::JsonLabel].IsString()) {
-            UtilityPivot::log_error("%s label not found in datapoint or is not a string", beforeLog.c_str());
-            continue;
-        }
-        std::string label = datapoint[ConstantsSystem::JsonLabel].GetString();
-
-        auto subtypes = datapoint[ConstantsSystem::JsonPivotSubtypes].GetArray();
-
-        for (rapidjson::Value::ConstValueIterator itr = subtypes.Begin(); itr != subtypes.End(); ++itr) {
-            std::string s = (*itr).GetString();
-            if(s == "prt.inf") {
-                foundPrtInf = true;
-                break;
-            }
-        }
-
+        foundPrtInf = m_importDatapoint(datapoint);
         if (foundPrtInf) {
             break;
         }
+        
     }
     UtilityPivot::log_debug("%s Connection loss tracking is %s", beforeLog.c_str(), foundPrtInf?"active":"inactive");
     m_connectionLossTracking = foundPrtInf;
+}
+
+/**
+ * Import data from a single datapoint of exchanged data
+ * 
+ * @param datapoint : datapoint to parse and import
+*/
+bool ConfigPlugin::m_importDatapoint(const rapidjson::Value& datapoint) {
+
+    std::string beforeLog = ConstantsSystem::NamePlugin + " - ConfigPlugin::m_importDatapoint :";
+    if (!datapoint.IsObject()) {
+        UtilityPivot::log_error("%s datapoint is not an object", beforeLog.c_str());
+        return false;
+    }
+    
+    if (!datapoint.HasMember(ConstantsSystem::JsonPivotType) || !datapoint[ConstantsSystem::JsonPivotType].IsString()) {
+        UtilityPivot::log_error("%s pivot_type not found in datapoint or is not a string", beforeLog.c_str());
+        return false;
+    }
+
+    std::string type = datapoint[ConstantsSystem::JsonPivotType].GetString();
+    if (type != ConstantsSystem::JsonCdcSps && type != ConstantsSystem::JsonCdcDps) {
+        // Ignore datapoints that are not a TS
+        return false;
+    }
+
+    if (!datapoint.HasMember(ConstantsSystem::JsonPivotId) || !datapoint[ConstantsSystem::JsonPivotId].IsString()) {
+        UtilityPivot::log_error("%s pivot_id not found in datapoint or is not a string", beforeLog.c_str());
+        return false;
+    }
+    std::string pivot_id = datapoint[ConstantsSystem::JsonPivotId].GetString();
+
+    if (!datapoint.HasMember(ConstantsSystem::JsonPivotSubtypes) || !datapoint[ConstantsSystem::JsonPivotSubtypes].IsArray()) {
+        // No pivot subtypes, nothing to do
+        return false;
+    }
+
+    if (!datapoint.HasMember(ConstantsSystem::JsonLabel) || !datapoint[ConstantsSystem::JsonLabel].IsString()) {
+        UtilityPivot::log_error("%s label not found in datapoint or is not a string", beforeLog.c_str());
+        return false;
+    }
+    std::string label = datapoint[ConstantsSystem::JsonLabel].GetString();
+
+    auto subtypes = datapoint[ConstantsSystem::JsonPivotSubtypes].GetArray();
+
+    bool foundPrtInf = false;
+    for (rapidjson::Value::ConstValueIterator itr = subtypes.Begin(); itr != subtypes.End(); ++itr) {
+        if (!(*itr).IsString()) {
+            continue;
+        }
+        std::string s = (*itr).GetString();
+        if(s == "prt.inf") {
+            foundPrtInf = true;
+            break;
+        }
+    }
+
+    return foundPrtInf;
 }
 
 void ConfigPlugin::importAsset(const std::string & assetConfig) {

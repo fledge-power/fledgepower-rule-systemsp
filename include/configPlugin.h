@@ -15,6 +15,8 @@
 #include <string>
 #include <memory>
 
+#include <rapidjson/document.h>
+
 namespace systemspr {
 
 class ConfigPlugin {
@@ -25,6 +27,8 @@ public:
     const std::string& getTrackedAsset() const { return m_trackedAsset; }
     
 private:
+    bool m_importDatapoint(const rapidjson::Value& datapoint);
+
     bool        m_connectionLossTracking{false};
     std::string m_trackedAsset;
 };

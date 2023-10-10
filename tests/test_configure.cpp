@@ -6,197 +6,6 @@
 
 using namespace systemspr;
 
-static std::string configureErrorParseJSON = QUOTE({
-    "exchanged_data" : {
-        "eee"
-    }
-});
-
-static std::string configureErrorRootNotObject = QUOTE(42);
-
-static std::string configureErrorExchanged_data = QUOTE({
-    "configureErrorExchanged_data": {         
-        "datapoints" : [          
-            {
-                "label":"TS-1",
-                "pivot_id":"M_2367_3_15_4",
-                "pivot_type":"SpsTyp",
-                "pivot_subtypes": [
-                    "prt.inf"
-                ],
-                "protocols":[
-                    {
-                        "name":"IEC104",
-                        "typeid":"M_ME_NC_1",
-                        "address":"3271612"
-                    }
-                ]
-            }
-        ]
-    }
-});
-
-static std::string configureErrorExchangedDataNotObject = QUOTE({
-    "exchanged_data" : [
-        42
-    ]
-});
-
-static std::string configureErrorDatapoint = QUOTE({
-    "exchanged_data": {         
-        "configureErrorDatapoint" : [          
-            {
-                "label":"TS-1",
-                "pivot_id":"M_2367_3_15_4",
-                "pivot_type":"SpsTyp",
-                "pivot_subtypes": [
-                    "prt.inf"
-                ],
-                "protocols":[
-                    {
-                        "name":"IEC104",
-                        "typeid":"M_ME_NC_1",
-                        "address":"3271612"
-                    }
-                ]
-            }
-        ]
-    }
-});
-
-static std::string configureErrorDatapointNotObject = QUOTE({
-    "exchanged_data": {         
-        "datapoints" : [          
-            42
-        ]
-    }
-});
-
-static std::string configureErrorType = QUOTE({
-    "exchanged_data": {         
-        "datapoints" : [          
-            {
-                "label":"TS-1",
-                "pivot_id":"M_2367_3_15_4",
-                "pivot_subtypes": [
-                    "prt.inf"
-                ],
-                "protocols":[
-                    {
-                        "name":"IEC104",
-                        "typeid":"M_ME_NC_1",
-                        "address":"3271612"
-                    }
-                ]
-            }
-        ]
-    }
-});
-
-static std::string configureErrorTypeMv = QUOTE({
-    "exchanged_data": {         
-        "datapoints" : [          
-            {
-                "label":"TS-1",
-                "pivot_id":"M_2367_3_15_4",
-                "pivot_type":"MvTyp",
-                "pivot_subtypes": [
-                    "prt.inf"
-                ],
-                "protocols":[
-                    {
-                        "name":"IEC104",
-                        "typeid":"M_ME_NC_1",
-                        "address":"3271612"
-                    }
-                ]
-            }
-        ]
-    }
-});
-
-static std::string configureErrorPivotID = QUOTE({
-    "exchanged_data": {         
-        "datapoints" : [          
-            {
-                "label":"TS-1",
-                "pivot_type":"SpsTyp",
-                "pivot_subtypes": [
-                    "prt.inf"
-                ],
-                "protocols":[
-                    {
-                        "name":"IEC104",
-                        "typeid":"M_ME_NC_1",
-                        "address":"3271612"
-                    }
-                ]
-            }
-        ]
-    }
-});
-
-static std::string configureErrorLabel = QUOTE({
-    "exchanged_data": {         
-        "datapoints" : [          
-            {
-                "pivot_id":"M_2367_3_15_4",
-                "pivot_type":"SpsTyp",
-                "pivot_subtypes": [
-                    "prt.inf"
-                ],
-                "protocols":[
-                    {
-                        "name":"IEC104",
-                        "typeid":"M_ME_NC_1",
-                        "address":"3271612"
-                    }
-                ]
-            }
-        ]
-    }
-});
-
-static std::string configureErrorSubtypes = QUOTE({
-    "exchanged_data": {         
-        "datapoints" : [          
-            {
-                "label":"TS-1",
-                "pivot_id":"M_2367_3_15_4",
-                "pivot_type":"SpsTyp",
-                "protocols":[
-                    {
-                        "name":"IEC104",
-                        "typeid":"M_ME_NC_1",
-                        "address":"3271612"
-                    }
-                ]
-            }
-        ]
-    }
-});
-
-static std::string configureErrorSubtypesWithUnknownSubtype = QUOTE({
-    "exchanged_data": {         
-        "datapoints" : [          
-            {
-                "label":"TS-1",
-                "pivot_id":"M_2367_3_15_4",
-                "pivot_type":"SpsTyp",
-                "pivot_subtypes": [
-                    "test"
-                ],
-                "protocols":[
-                    {
-                        "name":"IEC104",
-                        "typeid":"M_ME_NC_1",
-                        "address":"3271612"
-                    }
-                ]
-            }
-        ]
-    }
-});
 
 static std::string configureOKSps = QUOTE({
     "exchanged_data": {         
@@ -256,73 +65,372 @@ protected:
 
 TEST_F(TestPluginConfigure, ConfigureErrorParsingJSON) 
 {
-	configPlugin->importExchangedData(configureErrorParseJSON);
+	std::string configureErrorParseJSON = QUOTE({42});
+    
+    configPlugin->importExchangedData(configureErrorParseJSON);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
 TEST_F(TestPluginConfigure, ConfigureErrorRootNotObject) 
 {
-	configPlugin->importExchangedData(configureErrorRootNotObject);
+	std::string configureErrorRootNotObject = QUOTE(42);
+
+    configPlugin->importExchangedData(configureErrorRootNotObject);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
-TEST_F(TestPluginConfigure, ConfigureErrorExchanged_data) 
+TEST_F(TestPluginConfigure, ConfigureErrorNoExchangedData) 
 {
-	configPlugin->importExchangedData(configureErrorExchanged_data);
+	std::string configureErrorNoExchangedData = QUOTE({});
+    
+    configPlugin->importExchangedData(configureErrorNoExchangedData);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
 TEST_F(TestPluginConfigure, ConfigureErrorExchangedDataNotObject) 
 {
-	configPlugin->importExchangedData(configureErrorExchangedDataNotObject);
+	std::string configureErrorExchangedDataNotObject = QUOTE({
+        "exchanged_data" : 42
+    });
+    
+    configPlugin->importExchangedData(configureErrorExchangedDataNotObject);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
-TEST_F(TestPluginConfigure, ConfigureErrorDatapoint) 
+TEST_F(TestPluginConfigure, ConfigureErrorNoDatapoints) 
 {
-	configPlugin->importExchangedData(configureErrorDatapoint);
+	std::string configureErrorNoDatapoints = QUOTE({
+        "exchanged_data": {}
+    });
+    
+    configPlugin->importExchangedData(configureErrorNoDatapoints);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
-TEST_F(TestPluginConfigure, ConfigureErrorDatapointNotObject) 
+TEST_F(TestPluginConfigure, ConfigureErrorDatapointNotArray) 
 {
-	configPlugin->importExchangedData(configureErrorDatapointNotObject);
+    std::string configureErrorDatapointNotArray = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : 42
+        }
+    });
+
+    configPlugin->importExchangedData(configureErrorDatapointNotArray);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
-TEST_F(TestPluginConfigure, ConfigureErrorType) 
+TEST_F(TestPluginConfigure, ConfigureErrorDatapointsContainsNotObject) 
 {
-	configPlugin->importExchangedData(configureErrorType);
+    std::string configureErrorDatapointsContainsNotObject = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                42
+            ]
+        }
+    });
+
+    configPlugin->importExchangedData(configureErrorDatapointsContainsNotObject);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
-TEST_F(TestPluginConfigure, ConfigureErrorTypeMv) 
+TEST_F(TestPluginConfigure, ConfigureErrorNoType) 
 {
-	configPlugin->importExchangedData(configureErrorTypeMv);
+	std::string configureErrorNoType = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_subtypes": [
+                        "prt.inf"
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+    
+    configPlugin->importExchangedData(configureErrorNoType);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
-TEST_F(TestPluginConfigure, ConfigureErrorPivotID) 
+TEST_F(TestPluginConfigure, ConfigureErrorTypeNotString) 
 {
-	configPlugin->importExchangedData(configureErrorPivotID);
+	std::string configureErrorTypeNotString = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_type":42,
+                    "pivot_subtypes": [
+                        "prt.inf"
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+    
+    configPlugin->importExchangedData(configureErrorTypeNotString);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
-TEST_F(TestPluginConfigure, ConfigureErrorLabel) 
+TEST_F(TestPluginConfigure, ConfigureErrorTypeInvalid) 
 {
-	configPlugin->importExchangedData(configureErrorLabel);
+    std::string configureErrorTypeInvalid = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_type":"MvTyp",
+                    "pivot_subtypes": [
+                        "prt.inf"
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+    
+    configPlugin->importExchangedData(configureErrorTypeInvalid);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
-TEST_F(TestPluginConfigure, ConfigureErrorSubtypes) 
+TEST_F(TestPluginConfigure, ConfigureErrorNoPivotID) 
 {
-	configPlugin->importExchangedData(configureErrorSubtypes);
+	std::string configureErrorNoPivotID = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_type":"SpsTyp",
+                    "pivot_subtypes": [
+                        "prt.inf"
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+
+    configPlugin->importExchangedData(configureErrorNoPivotID);
+    ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
+}
+
+TEST_F(TestPluginConfigure, ConfigureErrorPivotIDNotString) 
+{
+	std::string configureErrorPivotIDNotString = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_id":42,
+                    "pivot_type":"SpsTyp",
+                    "pivot_subtypes": [
+                        "prt.inf"
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+
+    configPlugin->importExchangedData(configureErrorPivotIDNotString);
+    ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
+}
+
+TEST_F(TestPluginConfigure, ConfigureErrorNoLabel) 
+{
+	std::string configureErrorNoLabel = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_type":"SpsTyp",
+                    "pivot_subtypes": [
+                        "prt.inf"
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+
+    configPlugin->importExchangedData(configureErrorNoLabel);
+    ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
+}
+
+
+TEST_F(TestPluginConfigure, ConfigureErrorLabelNotString) 
+{
+	std::string configureErrorLabelNotString = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":42,
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_type":"SpsTyp",
+                    "pivot_subtypes": [
+                        "prt.inf"
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+
+    configPlugin->importExchangedData(configureErrorLabelNotString);
+    ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
+}
+
+TEST_F(TestPluginConfigure, ConfigureErrorNoSubtypes) 
+{
+	std::string configureErrorNoSubtypes = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_type":"SpsTyp",
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+    
+    configPlugin->importExchangedData(configureErrorNoSubtypes);
+    ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
+}
+
+TEST_F(TestPluginConfigure, ConfigureErrorSubtypesNotArray) 
+{
+	std::string configureErrorSubtypesNotArray = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_type":"SpsTyp",
+                    "pivot_subtypes": 42,
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+    
+    configPlugin->importExchangedData(configureErrorSubtypesNotArray);
+    ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
+}
+
+TEST_F(TestPluginConfigure, ConfigureErrorSubtypesNotContainString) 
+{
+	std::string configureErrorSubtypesNotContainString = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_type":"SpsTyp",
+                    "pivot_subtypes": [
+                        42
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+    
+    configPlugin->importExchangedData(configureErrorSubtypesNotContainString);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 
 TEST_F(TestPluginConfigure, ConfigureErrorSubtypesWithUnknownSubtype) 
 {
-	configPlugin->importExchangedData(configureErrorSubtypesWithUnknownSubtype);
+	std::string configureErrorSubtypesWithUnknownSubtype = QUOTE({
+        "exchanged_data": {         
+            "datapoints" : [          
+                {
+                    "label":"TS-1",
+                    "pivot_id":"M_2367_3_15_4",
+                    "pivot_type":"SpsTyp",
+                    "pivot_subtypes": [
+                        "test"
+                    ],
+                    "protocols":[
+                        {
+                            "name":"IEC104",
+                            "typeid":"M_ME_NC_1",
+                            "address":"3271612"
+                        }
+                    ]
+                }
+            ]
+        }
+    });
+    
+    configPlugin->importExchangedData(configureErrorSubtypesWithUnknownSubtype);
     ASSERT_FALSE(configPlugin->hasConnectionLossTracking());
 }
 

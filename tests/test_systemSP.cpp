@@ -20,7 +20,7 @@ static std::string configure = QUOTE({
     "exchanged_data": {
         "value": {
             "exchanged_data": {
-                "datapoints": [          
+                "datapoints": [
                     {
                         "label":"TS-1",
                         "pivot_id":"M_2367_3_15_4",
@@ -50,7 +50,7 @@ static std::string configure = QUOTE({
                                 "address":"3271613"
                             }
                         ]
-                    } 
+                    }
                 ]
             }
         }
@@ -77,7 +77,7 @@ std::string defaultTrigger = QUOTE({
         }
     ]
 });
- 
+
 extern "C" {
 	PLUGIN_INFORMATION *plugin_info();
 	PLUGIN_HANDLE plugin_init(ConfigCategory *config);
@@ -98,10 +98,10 @@ protected:
     {
         PLUGIN_INFORMATION *info = plugin_info();
 		ConfigCategory *config =  new ConfigCategory("systemsp", info->config);
-		ASSERT_NE(config, nullptr);		
+		ASSERT_NE(config, nullptr);
 		config->setItemsValueFromDefault();
 		config->setValue("enable", "true");
-		
+
 		PLUGIN_HANDLE handle = nullptr;
         ASSERT_NO_THROW(handle = plugin_init(config));
 		filter = static_cast<RuleSystemSp *>(handle);
@@ -119,7 +119,7 @@ protected:
     }
 
     template<class... Args>
-    static void debug_print(std::string format, Args&&... args) {    
+    static void debug_print(std::string format, Args&&... args) {
         printf(format.append("\n").c_str(), std::forward<Args>(args)...);
         fflush(stdout);
     }
@@ -166,7 +166,7 @@ TEST_F(TestSystemSp, ConnectionLossMessages)
         "exchanged_data": {
             "value": {
                 "exchanged_data": {
-                    "datapoints": [          
+                    "datapoints": [
                         {
                             "label":"TS-1",
                             "pivot_id":"M_2367_3_15_4",
@@ -196,7 +196,7 @@ TEST_F(TestSystemSp, ConnectionLossMessages)
                                     "address":"3271613"
                                 }
                             ]
-                        } 
+                        }
                     ]
                 }
             }
@@ -272,7 +272,7 @@ TEST_F(TestSystemSp, ConnectionLossMessages)
     ASSERT_FALSE(plugin_eval(filter, assetIrrelevantSouthEvent));
     ASSERT_STREQ(plugin_reason(filter).c_str(), "");
 
-    // Send asset with connection loss in south_event
+    // Send asset with connection not connected in south_event
     std::string assetConnectionLoss = QUOTE({
         "CONNECTION-1": {
             "south_event": {
@@ -283,8 +283,8 @@ TEST_F(TestSystemSp, ConnectionLossMessages)
     ASSERT_TRUE(plugin_eval(filter, assetConnectionLoss));
     std::string jsonNotification = plugin_reason(filter);
     validateNotification(jsonNotification, {
-        {"asset", "prt.inf"},
-        {"reason", "connection lost"}
+        {"asset", "connx_status"},
+        {"reason", "not connected"}
     });
     if(HasFatalFailure()) return;
 
@@ -299,13 +299,13 @@ TEST_F(TestSystemSp, ConnectionLossMessages)
     ASSERT_TRUE(plugin_eval(filter, assetGICompleted));
     jsonNotification = plugin_reason(filter);
     validateNotification(jsonNotification, {
-        {"asset", "prt.inf"},
-        {"reason", "connected"}
+        {"asset", "gi_status"},
+        {"reason", "finished"}
     });
     if(HasFatalFailure()) return;
 
 
-    // Send asset with connection loss and GI completed in south_event (priority to connection loss)
+    // Send asset with connection not connected and GI completed in south_event (priority to connection not connected)
     std::string assetConnectionLossAndGICompleted = QUOTE({
         "CONNECTION-1": {
             "south_event": {
@@ -317,19 +317,19 @@ TEST_F(TestSystemSp, ConnectionLossMessages)
     ASSERT_TRUE(plugin_eval(filter, assetConnectionLossAndGICompleted));
     jsonNotification = plugin_reason(filter);
     validateNotification(jsonNotification, {
-        {"asset", "prt.inf"},
-        {"reason", "connection lost"}
+        {"asset", "connx_status"},
+        {"reason", "not connected"}
     });
     if(HasFatalFailure()) return;
 }
 
-TEST_F(TestSystemSp, ConnectionLossInactive) 
+TEST_F(TestSystemSp, ConnectionLossInactive)
 {
     ASSERT_NO_THROW(plugin_reconfigure(reinterpret_cast<PLUGIN_HANDLE*>(filter), emptyConfig));
     ASSERT_TRUE(filter->isEnabled());
     ASSERT_FALSE(filter->getConfigPlugin().hasConnectionLossTracking());
     ASSERT_STREQ(plugin_triggers(filter).c_str(), defaultTrigger.c_str());
-   
+
     std::string assetValid = QUOTE({
         "CONNECTION-1": {
             "south_event": {
@@ -343,7 +343,7 @@ TEST_F(TestSystemSp, ConnectionLossInactive)
     ASSERT_STREQ(plugin_reason(filter).c_str(), "");
 }
 
-TEST_F(TestSystemSp, PluginDisabled) 
+TEST_F(TestSystemSp, PluginDisabled)
 {
 	static std::string customConfig = QUOTE({
         "enable": {
@@ -355,7 +355,7 @@ TEST_F(TestSystemSp, PluginDisabled)
         "exchanged_data": {
             "value": {
                 "exchanged_data": {
-                    "datapoints": [          
+                    "datapoints": [
                         {
                             "label":"TS-1",
                             "pivot_id":"M_2367_3_15_4",
@@ -395,7 +395,7 @@ TEST_F(TestSystemSp, PluginDisabled)
     ASSERT_STREQ(plugin_reason(filter).c_str(), "");
 }
 
-TEST_F(TestSystemSp, AssetTrigger) 
+TEST_F(TestSystemSp, AssetTrigger)
 {
     // By default asset name use in trigger is the default tracked asset
     ASSERT_STREQ(plugin_triggers(filter).c_str(), defaultTrigger.c_str());
@@ -441,8 +441,8 @@ TEST_F(TestSystemSp, AssetTrigger)
     ASSERT_TRUE(plugin_eval(filter, assetNewName));
     std::string jsonNotification = plugin_reason(filter);
     validateNotification(jsonNotification, {
-        {"asset", "prt.inf"},
-        {"reason", "connection lost"}
+        {"asset", "connx_status"},
+        {"reason", "not connected"}
     });
     if(HasFatalFailure()) return;
 

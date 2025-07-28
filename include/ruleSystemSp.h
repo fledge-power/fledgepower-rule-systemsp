@@ -9,7 +9,7 @@
  * Released under the Apache 2.0 Licence
  *
  * Author: Yannick Marchetaux
- * 
+ *
  */
 
 #include <datapoint_utility.h>
@@ -27,11 +27,11 @@ namespace systemspr {
 
 class RuleSystemSp
 {
-public:  
+public:
     void reconfigure(const ConfigCategory& config);
     void setJsonConfig(const ConfigCategory& config);
     const ConfigPlugin& getConfigPlugin() const { return m_configPlugin; }
-    bool isEnabled() const { return m_enabled; } 
+    bool isEnabled() const { return m_enabled; }
 
     bool evalRule(const std::string& assetValues);
     std::string getReason() const;
@@ -41,6 +41,7 @@ private:
     ConfigPlugin             m_configPlugin;
     mutable std::mutex       m_configMutex;
     std::atomic<bool>        m_enabled{false};
+    std::string              m_asset;
     std::string              m_reason;
 };
 };

@@ -6,7 +6,7 @@
  * Released under the Apache 2.0 Licence
  *
  * Author: Yannick Marchetaux
- * 
+ *
  */
 #include <regex>
 #include <datapoint.h>
@@ -25,7 +25,7 @@ using namespace systemspr;
 
 /**
  * Modification of configuration
- * 
+ *
  * @param config : configuration ExchangedData + Asset
  */
 void RuleSystemSp::setJsonConfig(const ConfigCategory& config) {
@@ -39,14 +39,15 @@ void RuleSystemSp::setJsonConfig(const ConfigCategory& config) {
 
 /**
  * Evaluated if the rule is matched by one of the input assets
- * 
+ *
  * @param assetValues : JSON string document with notification data.
  */
 bool RuleSystemSp::evalRule(const std::string& assetValues) {
     std::lock_guard<std::mutex> guard(m_configMutex);
     std::string beforeLog = ConstantsSystem::NamePlugin + " - RuleSystemSp::evalRule :";
-    // Reinitialize reason
+    // Reinitialize reason, asset cause
     m_reason = "";
+    m_asset = "";
     // Plugin disabled, no filtering
     if (!isEnabled()) {
         return false;
@@ -101,12 +102,14 @@ bool RuleSystemSp::evalRule(const std::string& assetValues) {
 
     if (connx_status == "not connected") {
         UtilityPivot::log_debug("%s Sending connection lost notification", beforeLog.c_str());
-        m_reason = "connection lost";
+        m_asset = "connx_status";
+        m_reason = "not connected";
         return true;
     }
     else if (gi_status == "finished") {
         UtilityPivot::log_debug("%s Sending connected notification", beforeLog.c_str());
-        m_reason = "connected";
+        m_asset = "gi_status";
+        m_reason = "finished";
         return true;
     }
 
@@ -122,12 +125,17 @@ std::string RuleSystemSp::getReason() const {
     if (m_reason.empty()) {
         return m_reason;
     }
+    std::string asset = m_asset;
+    if (asset.empty()) {
+        asset = "prt.inf";
+    }
 
     static const std::string reasonTemplate = QUOTE({
-        "asset": "prt.inf",
+        "asset": "<asset>",
         "reason": "<reason>"
     });
-    return std::regex_replace(reasonTemplate, std::regex("<reason>"), m_reason);
+    std::string result = std::regex_replace(reasonTemplate, std::regex("<asset>"), asset);
+    return std::regex_replace(result, std::regex("<reason>"), m_reason);
 }
 
 /**
